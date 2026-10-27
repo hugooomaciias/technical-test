@@ -1,7 +1,8 @@
 import json
 from pathlib import Path
+from typing import Annotated
 
-from fastapi import FastAPI
+from fastapi import Body, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -19,6 +20,7 @@ app.add_middleware(
 
 
 class Todo(BaseModel):
+    id: int | None = None
     title: str
     completed: bool = False
 
@@ -55,6 +57,34 @@ def add_todo(todo: Todo):
         todo (Todo): The todo to add.
     """
     todos = load_todos()
+
     todos.append(todo)
+    todo.id = max((t.id for t in todos if t.id is not None), default = 0) + 1
+
     save_todos(todos)
+
     return todo
+
+
+@app.patch(
+    "/todos/{todo_id}",
+    response_model=Todo,
+    responses={404: {"description": "Todo not found"}},
+    )
+def update_todo_status(todo_id: int, completed: Annotated[bool, Body(embed=True)]):
+    """
+    Update the completion status of a todo.
+
+    Args:
+        todo_id (int): The ID of the todo to update.
+        completed (bool): The new completion status.
+    """
+    todos = load_todos()
+    
+    for todo in todos:
+        if (todo.id == todo_id):
+            todo.completed = completed
+            save_todos(todos)
+            return todo
+
+    raise HTTPException(status_code=404, detail="Todo not found")

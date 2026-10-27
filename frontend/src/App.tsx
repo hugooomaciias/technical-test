@@ -34,9 +34,7 @@ function App() {
 		if (!todo) return;
 
 		toggleTodoStatus(id, todo.completed)
-			.then((updated) => {
-				setTodos((prev) => prev.map((t) => (t.id === id ? updated : t)));
-			})
+			.then()
 			.catch((error) => {
       			console.error("Failed to change todo status:", error);
     		});
