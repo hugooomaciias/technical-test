@@ -1,7 +1,8 @@
 // src/App.tsx
 import { useState } from "react";
 import type { Todo } from "./types/todo";
-import { getTodos, createTodo, toggleTodoStatus } from "./api/todo";
+import { getTodos, createTodo, toggleTodoStatus, deleteTodo } from "./api/todo";
+import { IconTrashFilled } from "@tabler/icons-react"
 
 function App() {
 	const [todos, setTodos] = useState<Todo[]>([]);
@@ -40,6 +41,17 @@ function App() {
     		});
 	};
 
+	const removeTodo = (id: number) => {
+		const todo = todos.find((t) => t.id === id);
+		if (!todo) return;
+
+		deleteTodo(id)
+			.then()
+			.catch((error) => {
+      			console.error("Failed to delete todo:", error);
+    		});
+	};
+
 	return (
 		<div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
 			<div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-2xl">
@@ -72,18 +84,27 @@ function App() {
 					{todos.map((todo) => (
 						<li
 							key={todo.id}
-							className={`flex items-center gap-2 bg-gray-50 p-3 rounded-lg border border-gray-200 ${
-								todo.completed ? "line-through text-gray-400" : ""
-							}`}
+							className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-gray-200"
 						>
-							<input
-								type="checkbox"
-								checked={todo.completed}
-								onChange={() => toggleTodo(todo.id)}
-								className="cursor-pointer"
-							/>
-							
-							<span>{todo.title}</span>
+							<div className={`flex items-center gap-2 ${todo.completed ? "line-through text-gray-400" : ""}`}>
+								<input
+									type="checkbox"
+									checked={todo.completed}
+									onChange={() => toggleTodo(todo.id)}
+									className="cursor-pointer"
+								/>
+								
+								<span>{todo.title}</span>
+							</div>
+
+							<button
+								onClick={() => removeTodo(todo.id)}
+								aria-label="Delete todo"
+								className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-2 py-2 rounded-lg transition-all duration-200 cursor-pointer"
+							>
+								<IconTrashFilled className="h-5 w-5" />
+								<span>Delete</span>
+							</button>
 						</li>
 					))}
 				</ul>

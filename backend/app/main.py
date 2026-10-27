@@ -70,7 +70,7 @@ def add_todo(todo: Todo):
     "/todos/{todo_id}",
     response_model=Todo,
     responses={404: {"description": "Todo not found"}},
-    )
+)
 def update_todo_status(todo_id: int, completed: Annotated[bool, Body(embed=True)]):
     """
     Update the completion status of a todo.
@@ -86,5 +86,28 @@ def update_todo_status(todo_id: int, completed: Annotated[bool, Body(embed=True)
             todo.completed = completed
             save_todos(todos)
             return todo
+
+    raise HTTPException(status_code=404, detail="Todo not found")
+
+
+@app.delete(
+    "/todos/{todo_id}",
+    status_code=204,
+    responses={404: {"description": "Todo not found"}}
+)
+def delete_todo(todo_id: int):
+    """
+    Delete a todo.
+
+    Args:
+        todo_id (int): The ID of the todo to delete.
+    """
+    todos = load_todos()
+    
+    for todo in todos:
+        if (todo.id == todo_id):
+            todos.remove(todo)
+            save_todos(todos)
+            return
 
     raise HTTPException(status_code=404, detail="Todo not found")
