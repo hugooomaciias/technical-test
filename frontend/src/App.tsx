@@ -8,24 +8,38 @@ function App() {
 	const [title, setTitle] = useState("");
 
 	const loadTodos = () => {
-		getTodos().then((data) => {
-			setTodos(data);
-		});
+		getTodos()
+			.then((data) => {
+				setTodos(data);
+			})
+			.catch((error) => {
+				console.error("Failed to load todos:", error);
+			});
 	};
 
 	const addTodo = () => {
 		if (!title.trim()) return;
 
-		createTodo(title);
+		createTodo(title)
+			.then(() => {
+      			setTitle("");
+    		})
+    		.catch((error) => {
+      			console.error("Failed to create todo:", error);
+    		});
 	};
 
 	const toggleTodo = (id: number) => {
 		const todo = todos.find((t) => t.id === id);
 		if (!todo) return;
 
-		toggleTodoStatus(id, todo.completed).then((updated) => {
-		setTodos((prev) => prev.map((t) => (t.id === id ? updated : t)));
-		});
+		toggleTodoStatus(id, todo.completed)
+			.then((updated) => {
+				setTodos((prev) => prev.map((t) => (t.id === id ? updated : t)));
+			})
+			.catch((error) => {
+      			console.error("Failed to change todo status:", error);
+    		});
 	};
 
 	return (
