@@ -1,5 +1,5 @@
 // src/App.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Todo } from "./types/todo";
 import { getTodos, createTodo, toggleTodoStatus, deleteTodo } from "./api/todo";
 import { IconTrashFilled } from "@tabler/icons-react"
@@ -7,6 +7,10 @@ import { IconTrashFilled } from "@tabler/icons-react"
 function App() {
 	const [todos, setTodos] = useState<Todo[]>([]);
 	const [title, setTitle] = useState("");
+
+	useEffect(() => {
+		loadTodos();
+	}, []);
 
 	const loadTodos = () => {
 		getTodos()
@@ -24,6 +28,7 @@ function App() {
 		createTodo(title)
 			.then(() => {
       			setTitle("");
+				loadTodos();
     		})
     		.catch((error) => {
       			console.error("Failed to create todo:", error);
@@ -35,18 +40,22 @@ function App() {
 		if (!todo) return;
 
 		toggleTodoStatus(id, todo.completed)
-			.then()
+			.then(() => {
+				loadTodos()
+			})
 			.catch((error) => {
       			console.error("Failed to change todo status:", error);
     		});
 	};
 
 	const removeTodo = (id: number) => {
-		const todo = todos.find((t) => t.id === id);
+		const todo = todos.some((t) => t.id === id);
 		if (!todo) return;
 
 		deleteTodo(id)
-			.then()
+			.then(() => {
+				loadTodos()
+			})
 			.catch((error) => {
       			console.error("Failed to delete todo:", error);
     		});
@@ -70,13 +79,6 @@ function App() {
 						className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition cursor-pointer"
 					>
 						Add
-					</button>
-
-					<button
-						onClick={loadTodos}
-						className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition cursor-pointer"
-					>
-						Load Tasks
 					</button>
 				</div>
 
