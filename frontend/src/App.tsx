@@ -1,8 +1,9 @@
 // src/App.tsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback  } from "react";
 import type { Todo } from "./types/todo";
 import { TodoForm } from "./components/TodoForm";
 import { TodoList } from "./components/TodoList";
+import { Toast, type ToastType } from "./components/Toast";
 import { getTodos, createTodo, updateTodo, deleteTodo } from "./api/todo";
 
 function App() {
@@ -10,9 +11,18 @@ function App() {
 	const [title, setTitle] = useState("");
 	const [description, setDescription] = useState("");
 	const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+	const [toast, setToast] = useState<{ id: number; message: string; type: ToastType } | null>(null);
 
 	useEffect(() => {
 		loadTodos();
+	}, []);
+
+	const showToast = (message: string, type: ToastType) => {
+		setToast({ id: Date.now(), message, type });
+	};
+
+	const closeToast = useCallback(() => {
+		setToast(null);
 	}, []);
 
 	const loadTodos = () => {
@@ -22,6 +32,7 @@ function App() {
 			})
 			.catch((error) => {
 				console.error("Failed to load todos:", error);
+				showToast("Couldn't load your tasks. Please try again later.", "error");
 			});
 	};
 
@@ -33,9 +44,12 @@ function App() {
       			setTitle("");
       			setDescription("");
 				loadTodos();
+
+				showToast("Task created", "success");
     		})
     		.catch((error) => {
       			console.error("Failed to create todo:", error);
+				showToast("Couldn't create the task. Please try again.", "error");
     		});
 	};
 
@@ -45,10 +59,11 @@ function App() {
 
 		updateTodo(id, { completed: !todo.completed })
 			.then(() => {
-				loadTodos()
+				loadTodos();
 			})
 			.catch((error) => {
       			console.error("Failed to update todo status:", error);
+				showToast("Couldn't update the task. Please try again.", "error");
     		});
 	};
 
@@ -58,10 +73,13 @@ function App() {
 
 		deleteTodo(id)
 			.then(() => {
-				loadTodos()
+				loadTodos();
+				
+				showToast("Task deleted", "success");
 			})
 			.catch((error) => {
       			console.error("Failed to delete todo:", error);
+				showToast("Couldn't delete the task. Please try again.", "error");
     		});
 	};
 
@@ -75,6 +93,7 @@ function App() {
 			})
 			.catch((error) => {
       			console.error("Failed to update favorite status:", error);
+				showToast("Couldn't update favorites. Please try again.", "error");
     		});
 	};
 
@@ -137,6 +156,15 @@ function App() {
 					/>
 				)}
 			</div>
+
+			{toast && (
+				<Toast
+					key={toast.id}
+					message={toast.message}
+					type={toast.type}
+					onClose={closeToast}
+				/>
+			)}
 		</div>
 	);
 }

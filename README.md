@@ -47,10 +47,10 @@ The API docs are available at `http://localhost:8000/docs`.
 
 ```
 backend/app/
-├── main.py                                          # App setup and CORS
-├── models/todo.py                              # Todo and TodoUpdate models
+├── main.py                             # App setup and CORS
+├── models/todo.py                      # Todo and TodoUpdate models
 ├── repositories/todo_repository.py     # Reads and writes todos.json
-└── routers/todos.py                             # /todos endpoints
+└── routers/todos.py                    # /todos endpoints
 ```
 
 The endpoints don't access the JSON file directly. All reads and writes go through the repository, so switching to a database would only mean changing that layer.
@@ -65,6 +65,10 @@ The endpoints don't access the JSON file directly. All reads and writes go throu
 | DELETE | `/todos/{todo_id}` | Delete a todo |
 
 PATCH only updates the fields sent in the body, so the same endpoint is used to complete a task and to mark it as favorite. PATCH and DELETE return `404` if the todo doesn't exist.
+
+## Notifications
+
+Toast notifications appear at the bottom of the screen to give feedback on actions that aren't obvious from the list itself. Errors are shown for any failed request, so the user knows when something didn't work. Success messages are only shown when a task is created or deleted, since completing a task or marking it as favorite already updates the list visually.
 
 ## Possible improvements
 
