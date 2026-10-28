@@ -1,8 +1,9 @@
 // src/App.tsx
 import { useState, useEffect } from "react";
 import type { Todo } from "./types/todo";
+import { TodoForm } from "./components/TodoForm";
+import { TodoList } from "./components/TodoList";
 import { getTodos, createTodo, updateTodo, deleteTodo } from "./api/todo";
-import { IconTrashFilled, IconHeart, IconHeartFilled } from "@tabler/icons-react"
 
 function App() {
 	const [todos, setTodos] = useState<Todo[]>([]);
@@ -86,31 +87,13 @@ function App() {
 			<div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-2xl">
 				<h1 className="text-2xl font-bold mb-4 text-gray-800">ToDo List</h1>
 
-				<div className="flex flex-col gap-4 mb-8">
-					<div className="flex flex-1 flex-col gap-2">
-						<input
-							value={title}
-							onChange={(e) => setTitle(e.target.value)}
-							placeholder="Add a new task..."
-							className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-						/>
-						
-						<textarea
-							value={description}
-							onChange={(e) => setDescription(e.target.value)}
-							placeholder="Description (optional)"
-							rows={3}
-							className="px-4 py-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-						/>
-					</div>
-
-					<button
-						onClick={addTodo}
-						className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition cursor-pointer"
-					>
-						Add
-					</button>
-				</div>
+				<TodoForm
+					title={title}
+					setTitle={setTitle}
+					description={description}
+					setDescription={setDescription}
+					addTodo={addTodo}
+				/>
 
 				<div className="flex items-center justify-between mb-3">
 					<h2 className="text-lg font-semibold text-gray-700">
@@ -146,54 +129,12 @@ function App() {
 						{showFavoritesOnly ? "No favorite tasks yet." : "No tasks yet. Add one above."}
 					</p>
 				) : (
-					<ul className="space-y-2">
-						{visibleTodos.map((todo) => (
-							<li
-								key={todo.id}
-								className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-gray-200"
-							>
-								<div className={`flex items-start gap-2 ${todo.completed ? "line-through text-gray-400" : ""}`}>
-									<input
-										type="checkbox"
-										checked={todo.completed}
-										onChange={() => toggleTodo(todo.id)}
-										className="mt-1.5 cursor-pointer"
-									/>
-									
-									<div className="flex flex-col">
-										<span>{todo.title}</span>
-										
-										{todo.description && (
-											<span className="text-sm text-gray-500">{todo.description}</span>
-										)}
-									</div>
-								</div>
-
-								<div className="flex items-center gap-2">
-									<button
-										onClick={() => removeTodo(todo.id)}
-										aria-label="Delete todo"
-										className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-2 py-2 rounded-lg transition-all duration-200 cursor-pointer"
-									>
-										<IconTrashFilled className="h-5 w-5" />
-										<span>Delete</span>
-									</button>
-
-									<button
-										onClick={() => toggleFavorite(todo.id)}
-										aria-label={todo.favorite ? `Remove todo from favorites` : `Add todo to favorites`}
-										className="h-10 w-10 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white px-2 py-2 rounded-lg transition-all duration-200 cursor-pointer"
-									>
-										{todo.favorite ? (
-											<IconHeartFilled className="h-5 w-5" />
-										) : (
-											<IconHeart className="h-5 w-5" />
-										)}
-									</button>
-								</div>
-							</li>
-						))}
-					</ul>
+					<TodoList
+						todos={visibleTodos}
+						toggleTodo={toggleTodo}
+						removeTodo={removeTodo}
+						toggleFavorite={toggleFavorite}
+					/>
 				)}
 			</div>
 		</div>
