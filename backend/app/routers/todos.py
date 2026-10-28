@@ -1,8 +1,6 @@
-from typing import Annotated
+from fastapi import APIRouter, HTTPException
 
-from fastapi import APIRouter, Body, HTTPException
-
-from app.models.todo import Todo
+from app.models.todo import Todo, TodoUpdate
 from app.repositories.todo_repository import TodoRepository
 
 router = APIRouter(prefix="/todos", tags=["todos"])
@@ -29,7 +27,7 @@ def add_todo(todo: Todo):
 
 
 @router.patch("/{todo_id}", response_model=Todo, responses=NOT_FOUND_RESPONSE)
-def update_todo_statues(todo_id: int, completed: Annotated[bool, Body(embed=True)]):
+def update_todo(todo_id: int, changes: TodoUpdate):
     """
     Update the completion status of a todo.
 
@@ -41,8 +39,10 @@ def update_todo_statues(todo_id: int, completed: Annotated[bool, Body(embed=True
     if todo is None:
         raise HTTPException(status_code=404, detail="Todo not found")
 
-    todo.completed = completed
-    return repository.update(todo)
+    updated_todo = todo.model_copy(
+        update=changes.model_dump(exclude_unset=True, exclude_none=True)
+    )
+    return repository.update(updated_todo)
 
 
 @router.delete("/{todo_id}", status_code=204, responses=NOT_FOUND_RESPONSE)
